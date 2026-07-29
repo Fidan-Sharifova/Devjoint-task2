@@ -1,6 +1,5 @@
-
 let tasks = JSON.parse(localStorage.getItem('kanbanTasks')) || [];
-
+let editingTaskId = null;
 
 const openModalBtn = document.getElementById('open-modal-btn');
 const closeModalBtn = document.querySelector('.modal__close');
@@ -12,6 +11,13 @@ const descInput = document.getElementById('task-desc');
 const priorityInput = document.getElementById('task-priority');
 const statusInput = document.getElementById('task-status');
 
+const todoColumn = document.querySelector('.kanban-column[data-status="todo"] .kanban-column__tasks');
+const progressColumn = document.querySelector('.kanban-column[data-status="in-progress"] .kanban-column__tasks');
+const doneColumn = document.querySelector('.kanban-column[data-status="done"] .kanban-column__tasks');
+
+const countTodo = document.getElementById('count-todo');
+const countProgress = document.getElementById('count-in-progress');
+const countDone = document.getElementById('count-done');
 
 function openModal() {
   taskModal.style.display = 'flex';
@@ -19,7 +25,8 @@ function openModal() {
 
 function closeModal() {
   taskModal.style.display = 'none';
-  taskForm.reset(); 
+  taskForm.reset();
+  editingTaskId = null;
 }
 
 openModalBtn.addEventListener('click', openModal);
@@ -31,38 +38,69 @@ taskModal.addEventListener('click', function(e) {
   }
 });
 
-
-
 taskForm.addEventListener('submit', function(e) {
-  e.preventDefault(); 
+  e.preventDefault();
   const titleValue = titleInput.value.trim();
   const descValue = descInput.value.trim();
 
-  const isDuplicate = tasks.some(task => task.title.toLowerCase() === titleValue.toLowerCase());
-  if (isDuplicate) {
-    alert('Bu adda tapşırıq artıq mövcuddur! Fərqli başlıq yazın.');
-    return; 
+  if (editingTaskId === null) {
+    const isDuplicate = tasks.some(task => task.title.toLowerCase() === titleValue.toLowerCase());
+    if (isDuplicate) {
+      alert('Bu adda tapşırıq artıq mövcuddur! Fərqli başlıq yazın.');
+      return;
+    }
+
+    const newTask = {
+      id: Date.now().toString(),
+      title: titleValue,
+      description: descValue,
+      priority: priorityInput.value,
+      status: statusInput.value,
+      createdAt: new Date().toISOString()
+    };
+
+    tasks.push(newTask);
+  } else {
+    for (let i = 0; i < tasks.length; i++) {
+      if (tasks[i].id === editingTaskId) {
+        tasks[i].title = titleValue;
+        tasks[i].description = descValue;
+        tasks[i].priority = priorityInput.value;
+        tasks[i].status = statusInput.value;
+      }
+    }
   }
 
-  const newTask = {
-    id: Date.now().toString(), 
-    title: titleValue,
-    description: descValue,
-    priority: priorityInput.value,
-    status: statusInput.value,
-    createdAt: new Date().toISOString() 
-  };
-
-  tasks.push(newTask);
-
   localStorage.setItem('kanbanTasks', JSON.stringify(tasks));
-
-  closeModal(); 
-  
-  console.log("Hazırkı Tapşırıqlar:", tasks); 
-  
+  closeModal();
+  renderTasks();
 });
 
+function deleteTask(id) {
+  let cavab = confirm('Bu tapşırığı silmək istədiyinizə əminsiniz?');
+  if (cavab === true) {
+    tasks = tasks.filter(function(task) {
+      return task.id !== id;
+    });
+    localStorage.setItem('kanbanTasks', JSON.stringify(tasks));
+    renderTasks();
+  }
+}
+
+function editTask(id) {
+  let tapilanTask = tasks.find(function(task) {
+    return task.id === id;
+  });
+
+  if (tapilanTask) {
+    titleInput.value = tapilanTask.title;
+    descInput.value = tapilanTask.description;
+    priorityInput.value = tapilanTask.priority;
+    statusInput.value = tapilanTask.status;
+    editingTaskId = id;
+    openModal();
+  }
+}
 
 function renderTasks() {
   todoColumn.innerHTML = '';
@@ -88,7 +126,7 @@ function renderTasks() {
 
     let titleH3 = document.createElement('h3');
     titleH3.className = 'task-card__title';
-    titleH3.textContent = task.title; 
+    titleH3.textContent = task.title;
 
     let descP = document.createElement('p');
     descP.className = 'task-card__desc';
@@ -103,6 +141,17 @@ function renderTasks() {
         <button class="delete" title="Sil">🗑️</button>
       </div>
     `;
+
+    let editBtn = footerDiv.querySelector('.edit');
+    let deleteBtn = footerDiv.querySelector('.delete');
+
+    editBtn.addEventListener('click', function() {
+      editTask(task.id);
+    });
+
+    deleteBtn.addEventListener('click', function() {
+      deleteTask(task.id);
+    });
 
     card.appendChild(prioritySpan);
     card.appendChild(titleH3);
