@@ -11,6 +11,9 @@ const descInput = document.getElementById('task-desc');
 const priorityInput = document.getElementById('task-priority');
 const statusInput = document.getElementById('task-status');
 
+const searchInput = document.getElementById('search-input');
+const priorityFilter = document.getElementById('priority-filter');
+
 const todoColumn = document.querySelector('.kanban-column[data-status="todo"] .kanban-column__tasks');
 const progressColumn = document.querySelector('.kanban-column[data-status="in-progress"] .kanban-column__tasks');
 const doneColumn = document.querySelector('.kanban-column[data-status="done"] .kanban-column__tasks');
@@ -111,8 +114,19 @@ function renderTasks() {
   let progressNum = 0;
   let doneNum = 0;
 
+  let axtarisSozu = searchInput.value.toLowerCase().trim();
+  let secilmisPrioritet = priorityFilter.value;
+
   for (let i = 0; i < tasks.length; i++) {
     let task = tasks[i];
+
+    let basliqUygunGelir = task.title.toLowerCase().includes(axtarisSozu);
+    let tesvirUygunGelir = task.description.toLowerCase().includes(axtarisSozu);
+    let prioritetUygunGelir = (secilmisPrioritet === 'all' || task.priority === secilmisPrioritet);
+
+    if ((!basliqUygunGelir && !tesvirUygunGelir) || !prioritetUygunGelir) {
+      continue;
+    }
 
     let card = document.createElement('div');
     card.className = 'task-card';
@@ -174,5 +188,8 @@ function renderTasks() {
   if (countProgress) countProgress.textContent = progressNum;
   if (countDone) countDone.textContent = doneNum;
 }
+
+searchInput.addEventListener('input', renderTasks);
+priorityFilter.addEventListener('change', renderTasks);
 
 renderTasks();
