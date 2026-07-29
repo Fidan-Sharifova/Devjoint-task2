@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kanban Task Board</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <header class="app-header">
+      <h1 class="app-header__title">Kanban Tapşırıq Lövhəsi</h1>
+      
+      <div class="app-controls">
+        <input 
+          type="text" 
+          id="search-input" 
+          class="app-controls__search" 
+          placeholder="Açar sözlə axtar..."
+        >
+        
+        <select id="priority-filter" class="app-controls__filter">
+          <option value="all">Bütün Prioritetlər</option>
+          <option value="low">Aşağı</option>
+          <option value="medium">Orta</option>
+          <option value="high">Yüksək</option>
+        </select>
+
+        <button id="open-modal-btn" class="btn btn--primary">+ Yeni Tapşırıq</button>
+      </div>
+    </header>
+
+    <main class="kanban-board">
+      
+      <section class="kanban-column" data-status="todo">
+        <div class="kanban-column__header kanban-column__header--todo">
+          <h2>Görüləcək <span id="count-todo" class="kanban-column__count">0</span></h2>
+        </div>
+        <div class="kanban-column__tasks" id="tasks-todo"></div>
+      </section>
+
+      <section class="kanban-column" data-status="in-progress">
+        <div class="kanban-column__header kanban-column__header--progress">
+          <h2>Icra Olunur <span id="count-in-progress" class="kanban-column__count">0</span></h2>
+        </div>
+        <div class="kanban-column__tasks" id="tasks-in-progress"></div>
+      </section>
+
+      <section class="kanban-column" data-status="done">
+        <div class="kanban-column__header kanban-column__header--done">
+          <h2>Tamamlandı <span id="count-done" class="kanban-column__count">0</span></h2>
+        </div>
+        <div class="kanban-column__tasks" id="tasks-done"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <div id="task-modal" class="modal">
+    <div class="modal__content">
+      <button class="modal__close" id="close-modal-btn">&times;</button>
+      <h2 id="modal-title" class="modal__title">Yeni Tapşırıq Əlavə Et</h2>
+      
+      <form id="task-form" class="task-form">
+        <input type="hidden" id="task-id">
+        
+        <div class="task-form__group">
+          <label for="task-title" class="task-form__label">Başlıq *</label>
+          <input type="text" id="task-title" class="task-form__input" placeholder="Tapşırıq başlığı..." required>
+        </div>
+
+        <div class="task-form__group">
+          <label for="task-desc" class="task-form__label">Təsvir</label>
+          <textarea id="task-desc" class="task-form__textarea" rows="3" placeholder="Qısa məlumat..."></textarea>
+        </div>
+
+        <div class="task-form__group">
+          <label for="task-priority" class="task-form__label">Prioritet</label>
+          <select id="task-priority" class="task-form__select">
+            <option value="low">Aşağı</option>
+            <option value="medium" selected>Orta</option>
+            <option value="high">Yüksək</option>
+          </select>
+        </div>
+
+        <div class="task-form__group">
+          <label for="task-status" class="task-form__label">Status</label>
+          <select id="task-status" class="task-form__select">
+            <option value="todo">Görüləcək</option>
+            <option value="in-progress">İcra Olunur</option>
+            <option value="done">Tamamlandı</option>
+          </select>
+        </div>
+
+        <div class="task-form__actions">
+          <button type="submit" class="btn btn--primary" id="save-task-btn">Yadda Saxla</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
