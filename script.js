@@ -1,5 +1,6 @@
 let tasks = JSON.parse(localStorage.getItem('kanbanTasks')) || [];
 let editingTaskId = null;
+let draggedTaskId = null; 
 
 const openModalBtn = document.getElementById('open-modal-btn');
 const closeModalBtn = document.querySelector('.modal__close');
@@ -167,6 +168,19 @@ function renderTasks() {
       deleteTask(task.id);
     });
 
+    card.addEventListener('dragstart', function() {
+      draggedTaskId = task.id;
+      setTimeout(function() {
+        card.style.display = 'none';
+      }, 0);
+    });
+
+    card.addEventListener('dragend', function() {
+      draggedTaskId = null;
+      card.style.display = 'block';
+      renderTasks();
+    });
+
     card.appendChild(prioritySpan);
     card.appendChild(titleH3);
     card.appendChild(descP);
@@ -191,5 +205,37 @@ function renderTasks() {
 
 searchInput.addEventListener('input', renderTasks);
 priorityFilter.addEventListener('change', renderTasks);
+
+let columns = document.querySelectorAll('.kanban-column');
+
+for (let i = 0; i < columns.length; i++) {
+  let col = columns[i];
+
+  col.addEventListener('dragover', function(e) {
+    e.preventDefault(); 
+    col.classList.add('drag-over');
+  });
+
+  col.addEventListener('dragleave', function() {
+    col.classList.remove('drag-over');
+  });
+
+  col.addEventListener('drop', function(e) {
+    e.preventDefault();
+    col.classList.remove('drag-over');
+
+    let newStatus = col.getAttribute('data-status');
+
+    if (draggedTaskId && newStatus) {
+      for (let j = 0; j < tasks.length; j++) {
+        if (tasks[j].id === draggedTaskId) {
+          tasks[j].status = newStatus;
+        }
+      }
+      localStorage.setItem('kanbanTasks', JSON.stringify(tasks));
+      renderTasks();
+    }
+  });
+}
 
 renderTasks();
